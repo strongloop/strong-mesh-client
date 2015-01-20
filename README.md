@@ -16,9 +16,7 @@ var mesh = MeshClient.create('/path/to/config/file.json', {
   interval: 2000
 });
 
-mesh.Process.find(function(err, procs) {
-  console.log(procs);
-});
+mesh.ManagerHost.create({host: 'foo.com', port: 3000});
 ```
 
 **Browser + Proxy**

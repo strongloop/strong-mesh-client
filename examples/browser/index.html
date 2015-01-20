@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html> 
+    <head>
+        <title>mesh client browser example</title>
+        <script src="/client.js"></script>
+        <script>
+          var mesh = require('strong-mesh-client')('http://localhost:3000');
+
+          mesh.models.ManagerHost.create({
+            host: 'localhost',
+            port: 4000
+          }, function() {
+            console.log(arguments);
+          });
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

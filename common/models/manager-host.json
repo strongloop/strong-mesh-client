@@ -1,0 +1,43 @@
+{
+  "name": "ManagerHost",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true
+    },
+    "host": {
+      "type": "string",
+      "required": true
+    },
+    "port": {
+      "type": "number",
+      "required": true
+    },
+    "error": {
+      "type": "object"
+    },
+    "errorType": {
+      "type": "string"
+    },
+    "app": {
+      "type": "object"
+    },
+    "actions": {
+      "type": [
+        "string"
+      ]
+    },
+    "processes": {
+      "type": "object"
+    },
+    "credentials": {
+      "type": "object"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": []
+}
