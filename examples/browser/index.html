@@ -12,6 +12,10 @@
           }, function() {
             console.log(arguments);
           });
+
+          mesh.notifications.on('host changed', function(data) {
+            console.log(data);
+          });
         </script>
     </head>
     <body>

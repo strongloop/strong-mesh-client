@@ -9,5 +9,8 @@
   },
   "ManagerHost": {
     "dataSource": "proxy"
+  },
+  "LoadBalancer": {
+    "dataSource": "proxy"
   }
 }

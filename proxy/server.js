@@ -1,9 +1,12 @@
 var loopback = require('loopback');
 var boot = require('loopback-boot');
 var buildBrowserBundle = require('./build-client');
+var Primus = require('primus')
 
 module.exports = function createServer(configFile, options) {
   var server = module.exports = loopback();
+  var sparks = [];
+  options = options || {};
 
   server.dataSource('file', {
     connector: 'memory',
@@ -12,7 +15,15 @@ module.exports = function createServer(configFile, options) {
 
   boot(server, __dirname);
 
+  server.setupPrimus = function(httpServer, options) {
+    options = options || {};
+    options.transformer = options.transformer || 'engine.io';
+    server.primus = new Primus(httpServer, options);
+  }
+
   server.get('/client.js', function(req, res) {
+    res.write(server.primus.library(), 'utf-8');
+
     buildBrowserBundle(process.env.NODE_ENV, res, function(err) {
       if(err) {
         res.status(500).send(err);
@@ -27,7 +38,10 @@ module.exports = function createServer(configFile, options) {
   server.models.ManagerHost.startPolling();
 
   server.models.ManagerHost.on('host changed', function(id) {
-    console.log('host %s changed!',  id);
+    primus.write({event: 'host changed', data: {host: id}});
+    ManagerHost.find(function(err, hosts) {
+      LoadBalancer.updateAllConfigs(hosts);
+    });
   });
 
   return server;

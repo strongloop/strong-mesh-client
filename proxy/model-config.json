@@ -9,5 +9,8 @@
   },
   "ManagerHost": {
     "dataSource": "file"
+  },
+  "LoadBalancer": {
+    "dataSource": "file"
   }
 }

@@ -45,9 +45,15 @@ module.exports = function setupHooks(server) {
       if(err) {
         return host.handleError(err, cb);
       }
-      // TODO(ritch) set host.app
+
+      if(inst.applicationName && inst.npmModules) {
+        host.app = {
+          name: inst.applicationName,
+          version: inst.npmModules.version
+        }
+      }
+
       inst.processes(function(err, processes) {
-        console.log('processes', arguments);
         if(err) {
           return host.handleError(err, cb);
         }
@@ -55,6 +61,9 @@ module.exports = function setupHooks(server) {
         host.setActions();
         host.processes = host.processes || {};
         host.processes.pids = processes;
+        if(host.app && processes && processes[0]) {
+          host.app.port = processes[0].port;
+        }
         if(Change.revisionForInst(host) !== originalRev) {
           ManagerHost.emit('host changed', host.id);
         }
@@ -120,11 +129,20 @@ module.exports = function setupHooks(server) {
   ManagerHost.prototype.setActions = function() {
     var procs = this.processes;
     var hasPids = procs && procs.pids && procs.pids.length;
-    var actions = this.actions = ['delete', 'edit'];
+    var actions = this.actions = ['delete', 'edit', 'env-set', 'env-get'];
+
     if(hasPids) {
-      actions.push('stop', 'restart');
+      actions.push('stop', 'restart', 'cluster-restart');
     } else {
       actions.push('start');
     }
+  }
+
+  ManagerHost.prototype.action = function(name, request, cb) {
+    this.getServiceInstance(function(err, inst) {
+      inst.actions.create({
+        request: request
+      }, cb);
+    });
   }
 };
