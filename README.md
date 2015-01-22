@@ -25,11 +25,11 @@ First mount the proxy as an express middleware / route handler.
 
 ```js
 // app => an express / loopback app
-var proxy = MeshProxy.create('/path/to/config/file.json', {
+var meshProxy = require('strong-mesh-client/proxy/server')('/path/to/config/file.json', {
   interval: 2000
 });
 
-app.use('/path/to/proxy', proxy.middleware(app));
+app.use('/path/to/proxy', meshProxy.middleware(app));
 ```
 
 Add the client script.
@@ -41,7 +41,7 @@ Add the client script.
 Interact with mesh from the browser via the proxy.
 
 ```js
-var mesh = MeshProxyClient.create('/path/to/proxy');
+var mesh = require('strong-mesh-client')('http://localhost:3000');;
 
 // get notifications when hosts change
 mesh.notifications.on('hosts changed', function() {
@@ -56,7 +56,7 @@ mesh.ManagerHost.create({
   host: '...',
   port: ...
 }, function(err, inst) {
-  
+  // host added
 });
 
 // delete from the config
@@ -102,11 +102,6 @@ ManagerHost.action('restart', cb);
   }
 }
 ```
-
-**Notes**
-
-When a host is added or removed the LoadBalancer should be notified.
-
 
 ### LoadBalancer
 
