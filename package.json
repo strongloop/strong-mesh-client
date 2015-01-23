@@ -14,7 +14,7 @@
     "serve-favicon": "^2.0.1",
     "node-uuid": "~1.4.2",
     "async": "~0.9.0",
-    "strong-pm": "~2.0.1",
+    "strong-pm": "^1.0.0",
     "primus": "~2.4.12",
     "engine.io": "~1.5.1"
   },

@@ -3,6 +3,10 @@
   "base": "PersistedModel",
   "idInjection": true,
   "properties": {
+    "protocol": {
+      "type": "string",
+      "default": "http"
+    },
     "host": {
       "type": "string"
     },
