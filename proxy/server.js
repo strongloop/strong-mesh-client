@@ -38,7 +38,7 @@ module.exports = function createServer(configFile, options) {
   server.models.ManagerHost.startPolling();
 
   server.models.ManagerHost.on('host changed', function(id) {
-    primus.write({event: 'host changed', data: {host: id}});
+    server.primus.write({event: 'host changed', data: {host: id}});
     ManagerHost.find(function(err, hosts) {
       LoadBalancer.updateAllConfigs(hosts);
     });
