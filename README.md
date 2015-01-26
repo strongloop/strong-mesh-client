@@ -63,7 +63,9 @@ mesh.ManagerHost.create({
 ManagerHost.deleteById('...', cb);
 
 // perform an action on a specific host
-managerHost.action('stop', cb);
+managerHost.action({
+  cmd: 'stop'
+}, cb);
 
 // global action (iterates over all valid hosts)
 ManagerHost.action('restart', cb);

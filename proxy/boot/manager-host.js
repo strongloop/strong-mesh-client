@@ -138,7 +138,7 @@ module.exports = function setupHooks(server) {
     }
   }
 
-  ManagerHost.prototype.action = function(name, request, cb) {
+  ManagerHost.prototype.action = function(request, cb) {
     this.getServiceInstance(function(err, inst) {
       inst.actions.create({
         request: request
