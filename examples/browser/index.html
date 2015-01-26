@@ -1,23 +1,63 @@
 <!DOCTYPE html>
-<html> 
+<html ng-app="mesh"> 
     <head>
         <title>mesh client browser example</title>
         <script src="/client.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.10/angular.min.js"></script>
         <script>
           var mesh = require('strong-mesh-client')('http://localhost:3000');
+          angular.module('mesh', [])
+            .controller('MeshController', ['$scope', function($scope) {
+              $scope.hosts = [];
+              var ManagerHost = mesh.models.ManagerHost;
 
-          mesh.models.ManagerHost.create({
-            host: 'localhost',
-            port: 4000
-          }, function() {
-            console.log(arguments);
-          });
+              ManagerHost.find(function(err, hosts) {
+                $scope.hosts = hosts;
+                $scope.$apply();
+              });
 
-          mesh.notifications.on('host changed', function(data) {
-            console.log(data);
-          });
+              $scope.newHost = {host: 'localhost', port: 4000};
+              $scope.create = function() {
+                ManagerHost.create($scope.newHost, function(err, host)  {
+                  $scope.createdHostId = host.id;
+                  $scope.$apply();
+                });
+              }
+
+              mesh.notifications.on('host changed', function(data) {
+                console.log('changed', data);
+                alert('A host has changed! (Host ID: ' + data.host + ')');
+              });
+            }]);
         </script>
     </head>
     <body>
+      <div ng-controller="MeshController">
+        <h1>Process Managers</h1>
+        <ul>
+          <li ng-repeat="host in hosts">
+            {{ host.host }}
+            {{ host.port }}
+            <ul>
+              <h2> Pids </h2>
+              <li ng-repeat="proc in host.processes.pids">
+                {{ proc.pid }}
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <div ng-show="hosts.length === 0">
+          <h3>No process managers...</h3>
+        </div>
+        <form>
+          <h1>Host</h1>
+          <input ng-model="newHost.host" />
+          <h1>Port</h1>
+          <input ng-model="newHost.port" />
+          {{createdHostId}}
+          <br />
+          <button ng-click="create()">Create New Host</button>
+        </form>
+      </div>
     </body>
 </html>
