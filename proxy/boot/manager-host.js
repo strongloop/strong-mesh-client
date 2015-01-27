@@ -19,20 +19,22 @@ module.exports = function setupHooks(server) {
   }
 
   ManagerHost.startPolling = function() {
+    ManagerHost.sync();
     setInterval(function() {
       ManagerHost.sync();
-    }, ManagerHost.settings.interval || 15000);
+    }, ManagerHost.settings.interval || 1000);
   }
 
   ManagerHost.sync = function(cb) {
     ManagerHost.find(function(err, hosts) {
       async.each(hosts, function(host, cb) {
-        host.sync(function(err) {
-          if(err) {
-            cb(err);
-          } else {
-            host.save(cb);
-          }
+        host.sync(function(err, changed) {
+          host.save(function(err) {
+            if(err) return cb(err);
+            if(changed) {
+              ManagerHost.emit('host changed', host.id);
+            }
+          });
         });
       }, cb);
     });
@@ -41,9 +43,12 @@ module.exports = function setupHooks(server) {
   ManagerHost.prototype.sync = function(cb) {
     var host = this;
     var originalRev = Change.revisionForInst(host);
+
     this.getServiceInstance(function(err, inst) {
       if(err) {
-        return host.handleError(err, cb);
+        return host.handleError(err, function(err) {
+          cb(err, Change.revisionForInst(host) !== originalRev);
+        });
       }
 
       if(inst.applicationName && inst.npmModules) {
@@ -61,13 +66,15 @@ module.exports = function setupHooks(server) {
         host.setActions();
         host.processes = host.processes || {};
         host.processes.pids = processes;
-        if(host.app && processes && processes[0]) {
-          host.app.port = processes[0].port;
+        var listeningSockets = processes && processes[0] && processes[0].listeningSockets;
+
+
+        var port = listeningSockets && listeningSockets[0] && listeningSockets[0].port
+
+        if(host.app && port) {
+          host.app.port = port;
         }
-        if(Change.revisionForInst(host) !== originalRev) {
-          ManagerHost.emit('host changed', host.id);
-        }
-        cb();
+        cb(null, Change.revisionForInst(host) !== originalRev);
       });
     });
   }
@@ -140,9 +147,14 @@ module.exports = function setupHooks(server) {
 
   ManagerHost.prototype.action = function(request, cb) {
     this.getServiceInstance(function(err, inst) {
-      inst.actions.create({
-        request: request
-      }, cb);
+      if(err) return cb(err);
+      if(inst) {
+        inst.actions.create({
+          request: request
+        }, cb);
+      } else {
+        cb(new Error('no instance available'));
+      }
     });
   }
 };

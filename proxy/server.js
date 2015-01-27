@@ -37,11 +37,17 @@ module.exports = function createServer(configFile, options) {
 
   server.models.ManagerHost.startPolling();
 
+  server.models.ManagerHost.find(function(err, hosts) {
+    server.models.LoadBalancer.updateAllConifgs(hosts);
+  });
+
   server.models.ManagerHost.on('host changed', function(id) {
     server.primus.write({event: 'host changed', data: {host: id}});
-    server.models.ManagerHost.find(function(err, hosts) {
-      server.models.LoadBalancer.updateAllConifgs(hosts);
-    });
+    setTimeout(function() {
+      server.models.ManagerHost.find(function(err, hosts) {
+        server.models.LoadBalancer.updateAllConifgs(hosts);
+      });
+    }, 2000);
   });
 
   return server;

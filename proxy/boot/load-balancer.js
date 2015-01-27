@@ -1,4 +1,7 @@
 var async = require('async');
+var loopback = require('loopback');
+var path = require('path');
+var boot = require('loopback-boot');
 
 module.exports = function(server) {
   var LoadBalancer = server.models.LoadBalancer;
@@ -10,7 +13,7 @@ module.exports = function(server) {
       var validHosts = [];
 
       hosts.forEach(function(host) {
-        if(host.host && host.app && host.app.port) {
+        if(!host.error && host.host && host.app && host.app.port) {
           validHosts.push({
             host: host.host,
             port: host.app.port
@@ -32,7 +35,7 @@ module.exports = function(server) {
   LoadBalancer.prototype.createClient = function() {
     var host = this;
     var client = loopback();
-    var ds = client.dataSource('remote', {
+    var remote = client.dataSource('db', {
       connector: 'remote',
       url: this.toURL() + '/api'
     });
@@ -41,6 +44,8 @@ module.exports = function(server) {
     boot(client, {
       appRootDir: path.join(path.dirname(require.resolve('strong-arc-lb')))
     });
+
+    client.models.Config.attachTo(remote);
 
     return client;
   }
