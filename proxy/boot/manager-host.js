@@ -125,6 +125,8 @@ module.exports = function setupHooks(server) {
       message: err.message,
       status: err.status
     };
+    this.processes = null;
+    this.app = null;
     // TODO(ritch) set this.errorType
     this.save(cb);
   }
