@@ -8,13 +8,16 @@ module.exports = function setupHooks(server) {
   var path = require('path');
 
   ManagerHost.beforeCreate = function(next) {
+    var host = this;
     this.id = uuid.v4();
     this.protocol = this.protocol || 'http';
     if(this.error) {
       next();
     } else {
       // get the latest info
-      this.sync(next);
+      this.sync(function(err, changed) {
+        next(err, host);
+      });
     }
   }
 

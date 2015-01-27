@@ -17,14 +17,17 @@
     "node-uuid": "~1.4.2",
     "primus": "~2.4.12",
     "serve-favicon": "^2.0.1",
-    "strong-pm": "^1.0.0"
+    "strong-pm": "^1.0.0",
+    "fs-extra": "~0.15.0"
   },
   "optionalDependencies": {
     "loopback-explorer": "^1.1.0"
   },
   "devDependencies": {
     "jshint": "^2.5.6",
-    "shelljs": "~0.3.0"
+    "shelljs": "~0.3.0",
+    "strong-pm": "~1.6.1",
+    "chai": "~1.10.0"
   },
   "repository": {
     "type": "",
