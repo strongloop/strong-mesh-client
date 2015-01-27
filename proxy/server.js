@@ -4,7 +4,7 @@ var buildBrowserBundle = require('./build-client');
 var Primus = require('primus')
 
 module.exports = function createServer(configFile, options) {
-  var server = module.exports = loopback();
+  var server = loopback();
   var sparks = [];
   options = options || {};
 

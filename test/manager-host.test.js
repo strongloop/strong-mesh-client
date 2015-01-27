@@ -14,10 +14,16 @@ describe('ManagerHost', function () {
     this.pm = createPM(PM_PORT);
     var proxy = this.proxy = require('../proxy/server')(path.join(SANDBOX, 'config.json'));
     this.ManagerHost = proxy.models.ManagerHost;
-    proxy.listen(3000, done);
+    done();
   });
 
-  beforeEach(sleep(2000));
+  beforeEach(function(done) {
+    this.pm.on('message', function(msg) {
+      if(msg.data.cmd === 'listening') {
+        done();
+      }
+    });
+  });
 
   beforeEach(function(done) {
     var test = this;
@@ -31,20 +37,29 @@ describe('ManagerHost', function () {
     });
   });
 
-  afterEach(function() {
-    this.pm.kill();
+  afterEach(function(done) {
     removeSandBox();
+    this.pm.kill('SIGTERM');
+    this.pm.on('exit', done);
   });
 
   describe('managerHost.sync()', function () {
     it('should update the managerHost with the remote info', function (done) {
       var test = this;
+      var host = this.host;
       this.host.sync(function(err) {
-        console.log(err);
-        console.log(test.host);
+        // TODO(ritch) test that the inst data comes back
+        expect(err).to.not.exist;
+        expect(host.error).to.not.exist;
+        expect(host.actions).to.contain('delete');
+        expect(host.actions).to.contain('edit');
         done();
       });
     });
+  });
+
+  describe('Event: host changed', function () {
+    
   });
 
   describe('Invalid host', function () {
@@ -75,7 +90,7 @@ function createPM(port) {
   var PATH_TO_PM = path.join(path.dirname(require.resolve('strong-pm')), 'bin', 'sl-pm.js');
   return spawn(PATH_TO_PM, ['--listen', port], {
     cwd: SANDBOX,
-    stdio:  [0,1,2]
+    stdio:  ['ignore', process.stdout, process.stderr, 'ipc']
   });
 }
 
@@ -86,10 +101,4 @@ function createSandbox() {
 
 function removeSandBox() {
   fs.removeSync(SANDBOX);
-}
-
-function sleep(time) {
-  return function(done) {
-    setTimeout(done, time);
-  }
 }

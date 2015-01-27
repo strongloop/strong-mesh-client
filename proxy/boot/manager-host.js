@@ -141,11 +141,12 @@ module.exports = function setupHooks(server) {
   ManagerHost.prototype.setActions = function() {
     var procs = this.processes;
     var hasPids = procs && procs.pids && procs.pids.length;
+    var hasApp = this.app;
     var actions = this.actions = ['delete', 'edit', 'env-set', 'env-get'];
 
     if(hasPids) {
       actions.push('stop', 'restart', 'cluster-restart');
-    } else {
+    } else if(hasApp) {
       actions.push('start');
     }
   }
