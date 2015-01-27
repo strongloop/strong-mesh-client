@@ -42,7 +42,9 @@ module.exports = function createServer(configFile, options) {
   });
 
   server.models.ManagerHost.on('host changed', function(id) {
-    server.primus.write({event: 'host changed', data: {host: id}});
+    if(server.primus) {
+      server.primus.write({event: 'host changed', data: {host: id}});
+    }
     setTimeout(function() {
       server.models.ManagerHost.find(function(err, hosts) {
         server.models.LoadBalancer.updateAllConifgs(hosts);

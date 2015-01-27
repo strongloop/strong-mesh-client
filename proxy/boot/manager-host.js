@@ -11,14 +11,11 @@ module.exports = function setupHooks(server) {
     var host = this;
     this.id = uuid.v4();
     this.protocol = this.protocol || 'http';
-    if(this.error) {
-      next();
-    } else {
-      // get the latest info
-      this.sync(function(err, changed) {
-        next(err, host);
-      });
-    }
+    next();
+    // get the latest info
+    this.sync(function(err, changed) {
+      
+    });
   }
 
   ManagerHost.startPolling = function() {

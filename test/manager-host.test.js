@@ -43,6 +43,15 @@ describe('ManagerHost', function () {
     this.pm.on('exit', done);
   });
 
+  describe('ManagerHost.find()', function () {
+    it('should find the newly added host', function (done) {
+      this.ManagerHost.find(function(err, hosts) {
+        expect(hosts.length).to.eql(1);
+        done();
+      });
+    });
+  });
+
   describe('managerHost.sync()', function () {
     it('should update the managerHost with the remote info', function (done) {
       var test = this;
@@ -59,7 +68,17 @@ describe('ManagerHost', function () {
   });
 
   describe('Event: host changed', function () {
-    
+    it('should be emitted when a host changes', function (done) {
+      var test = this;
+      this.ManagerHost.on('host changed', function() {
+        done();
+      });
+
+      test.host.action({
+        cmd: 'set-size',
+        size: 1
+      }, done);
+    });
   });
 
   describe('Invalid host', function () {
