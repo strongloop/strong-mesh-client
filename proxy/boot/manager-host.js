@@ -46,6 +46,7 @@ module.exports = function setupHooks(server) {
 
     this.getServiceInstance(function(err, inst) {
       if(err) {
+        host.setActions();
         return host.handleError(err, function(err) {
           cb(err, Change.revisionForInst(host) !== originalRev);
         });
@@ -63,7 +64,6 @@ module.exports = function setupHooks(server) {
           return host.handleError(err, cb);
         }
         host.clearError();
-        host.setActions();
         host.processes = host.processes || {};
         host.processes.pids = processes;
         var listeningSockets = processes && processes[0] && processes[0].listeningSockets;
@@ -74,6 +74,7 @@ module.exports = function setupHooks(server) {
         if(host.app && port) {
           host.app.port = port;
         }
+        host.setActions();
         cb(null, Change.revisionForInst(host) !== originalRev);
       });
     });
@@ -139,7 +140,11 @@ module.exports = function setupHooks(server) {
     var procs = this.processes;
     var hasPids = procs && procs.pids && procs.pids.length;
     var hasApp = this.app;
-    var actions = this.actions = ['delete', 'edit', 'env-set', 'env-get'];
+    var actions = this.actions = ['delete', 'edit'];
+
+    if(!this.error) {
+      actions.push('env-set', 'env-get');
+    }
 
     if(hasPids) {
       actions.push('stop', 'restart', 'cluster-restart');

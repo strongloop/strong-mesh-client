@@ -22,6 +22,7 @@ module.exports = function createServer(configFile, options) {
   }
 
   server.get('/client.js', function(req, res) {
+    res.set('Content-Type', 'application/javascript');
     res.write(server.primus.library(), 'utf-8');
 
     buildBrowserBundle(process.env.NODE_ENV, res, function(err) {
