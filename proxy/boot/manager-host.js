@@ -1,22 +1,21 @@
 module.exports = function setupHooks(server) {
   var uuid = require('node-uuid');
   var url = require('url');
+  var request = require('request');
   var ManagerHost = server.models.ManagerHost;
   var loopback = require('loopback');
   var Change = loopback.Change;
   var boot = require('loopback-boot');
   var async = require('async');
   var path = require('path');
+  var debug = require('debug')('ManagerHost');
 
   ManagerHost.beforeCreate = function(next) {
     var host = this;
     this.id = uuid.v4();
     this.protocol = this.protocol || 'http';
+    debug('creating host %s:%s', host.host, host.port);
     next();
-    // get the latest info
-    this.sync(function(err, changed) {
-      
-    });
   }
 
   ManagerHost.startPolling = function() {
@@ -45,10 +44,14 @@ module.exports = function setupHooks(server) {
     var host = this;
     var originalRev = Change.revisionForInst(host);
 
+    host.debug('sync started');
+
     this.getServiceInstance(function(err, inst) {
       if(err) {
         host.setActions();
-        return host.handleError(err, function(err) {
+        return host.handleError(err, function(handleErrorErr) {
+          if(handleErrorErr) return cb(handleErrorErr);
+          host.debug('sync error');
           cb(err, Change.revisionForInst(host) !== originalRev);
         });
       }
@@ -61,24 +64,49 @@ module.exports = function setupHooks(server) {
       }
 
       inst.processes(function(err, processes) {
+
+      });
+      request({
+        url: host.toURL() + '/ServiceInstance/' + inst.id + '/processes',
+        json: true,
+        verb: 'GET'
+      }, function(err, body, res) {
+        var processes = body;
+
         if(err) {
+          host.debug('error getting processes');
+          host.debug(err);
           return host.handleError(err, cb);
         }
         host.clearError();
         host.processes = host.processes || {};
         host.processes.pids = processes;
+
         var listeningSockets = processes && processes[0] && processes[0].listeningSockets;
 
+        host.debug('setting host.processes.pids');
+        host.debug(processes);
 
         var port = listeningSockets && listeningSockets[0] && listeningSockets[0].port
 
         if(host.app && port) {
           host.app.port = port;
+          host.debug('setting app port');
+          host.debug(port);
         }
         host.setActions();
-        cb(null, Change.revisionForInst(host) !== originalRev);
+        host.debug('sync complete');
+        host.save(function(err) {
+          if(err) return cb(err);
+          cb(null, Change.revisionForInst(host) !== originalRev);
+        });
       });
     });
+  }
+
+  ManagerHost.prototype.debug = function(msg) {
+    var url = this.toURL();
+    debug('(%s) - %j', url, msg);
   }
 
   ManagerHost.prototype.createClient = function() {
@@ -101,7 +129,7 @@ module.exports = function setupHooks(server) {
       u.hostname = host.host;
       u.port = host.port;
       ctx.req.url = url.format(u);
-      ctx.req.host = host.host + ':' + host.port;
+      host.debug('making request to ' + ctx.req.url);
       ctx.req.headers = ctx.req.headers || {};
       ctx.req.headers.Authorization =  host.getAuthString();
       next();

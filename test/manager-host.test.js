@@ -2,12 +2,27 @@ var path = require('path');
 var SANDBOX = path.join(__dirname, 'sandbox');
 var fs = require('fs-extra');
 var spawn = require('child_process').spawn;
-var PM_PORT = 8000;
 var expect = require('chai').expect;
+
+var testPM = {
+  host: 'localhost',
+  port: 8000
+};
+var altTestPM = {
+  host: 'localhost',
+  port: 9000
+};
+var invalidPM = {
+  host: 'invalid',
+  port: 2222
+};
+
+var PM_PORT = testPM.port;
+var ALT_PM_PORT = altTestPM.port;
 
 describe('ManagerHost', function () {
 
-  this.timeout(10000);
+  this.timeout(0);
 
   beforeEach(function (done) {
     createSandbox();
@@ -51,6 +66,53 @@ describe('ManagerHost', function () {
         done();
       });
     });
+    describe('multiple PMs', function () {
+      beforeEach(function() {
+        this.altPM = createPM(ALT_PM_PORT);
+      });  
+      beforeEach(function(done) {
+        this.altPM.on('message', function(msg) {
+          if(msg.data.cmd === 'listening') {
+            done();
+          }
+        });
+      });
+      beforeEach(function(done) {
+        var test = this;
+        this.proxy.models.ManagerHost.create(altTestPM, function(err, host) {
+          if(err) return done(err);
+          test.altHost = host;
+          done();
+        });
+      });
+      beforeEach(function(done) {
+        deployTo(altTestPM, done);
+      });
+      beforeEach(sleep(5000));
+      it('should have a unique set of pids', function (done) {
+        var test = this;
+
+        test.host.sync(function() {
+          test.altHost.sync(function() {
+            expect(test.host.processes.pids).to.not.eql(test.altHost.processes.pids);
+            test.ManagerHost.find(function(err, hosts) {
+              expect(hosts.length).to.equal(2);
+              var host = hosts[0];
+              var altHost = hosts[1];
+
+              host.debug('-----pids--------');
+              host.debug(host.processes.pids);
+
+              altHost.debug('-----pids--------');
+              altHost.debug(altHost.processes.pids);
+
+              expect(host.processes.pids).to.not.eql(altHost.processes.pids);
+              done();
+            });
+          });
+        });
+      });
+    });
   });
 
   describe('managerHost.sync()', function () {
@@ -70,7 +132,7 @@ describe('ManagerHost', function () {
   describe('Event: host changed', function () {
     it('should be emitted when a host changes', function (done) {
       var test = this;
-      this.ManagerHost.on('host changed', function() {
+      this.ManagerHost.once('host changed', function() {
         done();
       });
 
@@ -84,10 +146,7 @@ describe('ManagerHost', function () {
   describe('Invalid host', function () {
     beforeEach(function(done) {
       var test = this;
-      this.ManagerHost.create({
-        host: 'invalid',
-        port: 2222
-      }, function(err, invalidHost) {
+      this.ManagerHost.create(invalidPM, function(err, invalidHost) {
         if(err) return done(err);
         test.invalidHost = invalidHost;
         done();
@@ -106,9 +165,11 @@ describe('ManagerHost', function () {
 });
 
 function createPM(port) {
+  var dir = path.join(SANDBOX, port.toString());
+  fs.mkdirSync(dir);
   var PATH_TO_PM = path.join(path.dirname(require.resolve('strong-pm')), 'bin', 'sl-pm.js');
   return spawn(PATH_TO_PM, ['--listen', port], {
-    cwd: SANDBOX,
+    cwd: dir,
     stdio:  ['ignore', process.stdout, process.stderr, 'ipc']
   });
 }
@@ -120,4 +181,27 @@ function createSandbox() {
 
 function removeSandBox() {
   fs.removeSync(SANDBOX);
+}
+
+function deployTo(pm, cb) {
+  var PATH_TO_DEPLOY = path.join(path.dirname(require.resolve('strong-deploy')), 'bin', 'sl-deploy.js');
+  var tarball = path.join(__dirname, 'fixtures', 'sample-app.tgz');
+  var pmURL = 'http://' + pm.host + ':' + pm.port;
+  var deploy = spawn(PATH_TO_DEPLOY, [pmURL, tarball], {
+    stdio:  ['ignore', process.stdout, process.stderr, 'ipc']
+  });
+
+  deploy.on('exit', function(code) {
+    if(code) {
+      cb(new Error('failed to deploy'));
+    } else {
+      cb();
+    }
+  });
+}
+
+function sleep(ms) {
+  return function(done) {
+    setTimeout(done, ms);
+  }
 }
