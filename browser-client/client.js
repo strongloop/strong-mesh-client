@@ -3,7 +3,7 @@ var boot = require('loopback-boot');
 var EventEmitter = require('events').EventEmitter;
 
 module.exports = function createClient(proxyUrl, options) {
-  var server = oopback();
+  var server = loopback();
   options = options || {};
 
   server.dataSource('proxy', {
@@ -22,6 +22,6 @@ module.exports = function createClient(proxyUrl, options) {
   });
 
   boot(server, __dirname);
-  
+
   return server;
 }
