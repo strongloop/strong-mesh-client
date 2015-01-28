@@ -1,5 +1,6 @@
 module.exports = function setupHooks(server) {
   var uuid = require('node-uuid');
+  var url = require('url');
   var ManagerHost = server.models.ManagerHost;
   var loopback = require('loopback');
   var Change = loopback.Change;
@@ -96,6 +97,11 @@ module.exports = function setupHooks(server) {
     ds.connector.remotes.before('**', before);
     
     function before(ctx, next) {
+      var u = url.parse(ctx.req.url);
+      u.hostname = host.host;
+      u.port = host.port;
+      ctx.req.url = url.format(u);
+      ctx.req.host = host.host + ':' + host.port;
       ctx.req.headers = ctx.req.headers || {};
       ctx.req.headers.Authorization =  host.getAuthString();
       next();
