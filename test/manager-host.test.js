@@ -47,6 +47,7 @@ describe('ManagerHost', function () {
     it('should find the newly added host', function (done) {
       this.ManagerHost.find(function(err, hosts) {
         expect(hosts.length).to.eql(1);
+        expect(hosts[0].port).to.eql(PM_PORT); 
         done();
       });
     });
@@ -57,7 +58,6 @@ describe('ManagerHost', function () {
       var test = this;
       var host = this.host;
       this.host.sync(function(err) {
-        // TODO(ritch) test that the inst data comes back
         expect(err).to.not.exist;
         expect(host.error).to.not.exist;
         expect(host.actions).to.contain('delete');
