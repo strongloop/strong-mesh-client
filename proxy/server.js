@@ -19,11 +19,12 @@ module.exports = function createServer(configFile, options) {
     options = options || {};
     options.transformer = options.transformer || 'engine.io';
     server.primus = new Primus(httpServer, options);
+    server.primusClient = server.primus.library();
   }
 
   server.get('/client.js', function(req, res) {
     res.set('Content-Type', 'application/javascript');
-    res.write(server.primus.library(), 'utf-8');
+    res.write(server.primusClient, 'utf-8');
 
     buildBrowserBundle(process.env.NODE_ENV, res, function(err) {
       if(err) {
