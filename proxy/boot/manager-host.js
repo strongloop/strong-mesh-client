@@ -60,8 +60,6 @@ module.exports = function setupHooks(server) {
     var host = this;
 
     host.clearRemoteInfo();
-    
-    host.debug('sync started');
 
     this.getServiceInstance(function(err, inst) {
       if(err) {
@@ -93,18 +91,12 @@ module.exports = function setupHooks(server) {
 
         var listeningSockets = processes && processes[0] && processes[0].listeningSockets;
 
-        host.debug('setting host.processes.pids');
-        host.debug(processes);
-
         var port = listeningSockets && listeningSockets[0] && listeningSockets[0].port
 
         if(host.app && port) {
           host.app.port = port;
-          host.debug('setting app port');
-          host.debug(port);
         }
         host.setActions();
-        host.debug('sync complete');
         cb();
       });
     });
@@ -235,6 +227,8 @@ module.exports = function setupHooks(server) {
     this.getServiceInstance(function(err, inst) {
       if(err) return cb(err);
       if(inst) {
+        host.debug('performing action:');
+        host.debug(req);
         request({
           url: host.getServiceInstanceURL() + '/' + inst.id + '/actions',
           json: true,
