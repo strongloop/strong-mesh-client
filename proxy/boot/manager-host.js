@@ -28,11 +28,20 @@ module.exports = function setupHooks(server) {
   ManagerHost.sync = function(cb) {
     ManagerHost.find(function(err, hosts) {
       async.each(hosts, function(host, cb) {
-        host.sync(function(err, changed) {
+        var originalRev = Change.revisionForInst(host);
+
+        host.sync(function(err) {
+          if(err) {
+            host.handleError(err);
+          }
+
+          host.setActions();
           host.save(function(err) {
-            if(err) return cb(err);
-            if(changed) {
-              ManagerHost.emit('host changed', host.id);
+            if(err) {
+              return cb(err);
+            }
+            if(Change.revisionForInst(host) !== originalRev) {
+              ManagerHost.emit('host changed', host);
             }
           });
         });
@@ -40,20 +49,23 @@ module.exports = function setupHooks(server) {
     });
   }
 
+  ManagerHost.prototype.clearRemoteInfo = function() {
+    this.clearError();
+    this.app = null;
+    this.processes = null;
+    this.setActions();
+  };
+
   ManagerHost.prototype.sync = function(cb) {
     var host = this;
-    var originalRev = Change.revisionForInst(host);
 
+    host.clearRemoteInfo();
+    
     host.debug('sync started');
 
     this.getServiceInstance(function(err, inst) {
       if(err) {
-        host.setActions();
-        return host.handleError(err, function(handleErrorErr) {
-          if(handleErrorErr) return cb(handleErrorErr);
-          host.debug('sync error');
-          cb(err, Change.revisionForInst(host) !== originalRev);
-        });
+        return cb(err);
       }
 
       if(inst.applicationName && inst.npmModules) {
@@ -63,20 +75,17 @@ module.exports = function setupHooks(server) {
         }
       }
 
-      inst.processes(function(err, processes) {
-
-      });
       request({
-        url: host.toURL() + '/ServiceInstance/' + inst.id + '/processes',
+        url: host.toURL() + '/api/ServiceInstances/' + inst.id + '/processes',
         json: true,
         verb: 'GET'
-      }, function(err, body, res) {
+      }, function(err, res, body) {
         var processes = body;
+        
+        err = host.getHttpError(err, res, body);
 
         if(err) {
-          host.debug('error getting processes');
-          host.debug(err);
-          return host.handleError(err, cb);
+          return cb(err);
         }
         host.clearError();
         host.processes = host.processes || {};
@@ -96,10 +105,7 @@ module.exports = function setupHooks(server) {
         }
         host.setActions();
         host.debug('sync complete');
-        host.save(function(err) {
-          if(err) return cb(err);
-          cb(null, Change.revisionForInst(host) !== originalRev);
-        });
+        cb();
       });
     });
   }
@@ -139,7 +145,18 @@ module.exports = function setupHooks(server) {
   }
 
   ManagerHost.prototype.getServiceInstance = function(cb) {
-    this.createClient().models.ServiceInstance.findOne(cb);
+    var host = this;
+    request({
+      url: this.getServiceInstanceURL() + '/findOne',
+      json: true,
+      verb: 'GET'
+    }, function(err, res, body) {
+      err = host.getHttpError(err, res, body);
+      if(err) {
+        return cb(err);
+      } 
+      cb(null, body);
+    });
   }
 
   ManagerHost.prototype.toURL = function() {
@@ -162,8 +179,25 @@ module.exports = function setupHooks(server) {
     };
     this.processes = null;
     this.app = null;
-    // TODO(ritch) set this.errorType
-    this.save(cb);
+    this.errorType = this.getErrorType();
+  }
+
+  ManagerHost.prototype.getErrorType = function() {
+    if(!this.error) return null;
+    var status = this.error.status;
+    var msg = this.error.message;
+    if(status) {
+      if(status >= 400 && status <= 500) {
+        return 'invalid'
+      }
+      if(status >= 500 && status <= 600) {
+        return 'server'
+      }
+    }
+    if(msg.indexOf('ENOTFOUND') > -1 ||  msg.indexOf('ECONNREFUSED')) {
+      return 'connection';
+    }
+    return 'unknown';
   }
 
   ManagerHost.prototype.clearError = function() {
@@ -174,29 +208,65 @@ module.exports = function setupHooks(server) {
     var procs = this.processes;
     var hasPids = procs && procs.pids && procs.pids.length;
     var hasApp = this.app;
-    var actions = this.actions = ['delete', 'edit'];
+    var actions = ['delete', 'edit'];
 
-    if(!this.error) {
-      actions.push('env-set', 'env-get');
+    if(this.error) {
+      host.debug('limiting actions due to host.error');
+      this.actions = actions;
+      return;
     }
+
+    // always allow these
+    actions.push('env-set', 'env-get');
 
     if(hasPids) {
       actions.push('stop', 'restart', 'cluster-restart');
     } else if(hasApp) {
+      host.debug('limiting actions due to no pids found');
       actions.push('start');
     }
+
+    this.actions = actions;
   }
 
-  ManagerHost.prototype.action = function(request, cb) {
+  ManagerHost.prototype.action = function(req, cb) {
+    var host = this;
     this.getServiceInstance(function(err, inst) {
       if(err) return cb(err);
       if(inst) {
-        inst.actions.create({
-          request: request
-        }, cb);
+        request({
+          url: host.getServiceInstanceURL() + '/' + inst.id + '/actions',
+          json: true,
+          body: {
+            request: req
+          },
+          verb: 'POST'
+        }, function(err, res, body) {
+          err = host.getHttpError(err, res, body);
+          if(err) {
+            return cb(err);
+          }
+          cb(null, body);
+        });
       } else {
         cb(new Error('no instance available'));
       }
     });
+  }
+
+  ManagerHost.prototype.getHttpError = function(err, res, body) {
+    if(res && res.statusCode >= 400) {
+
+      err = body.error || body;
+      err.status = res.statusCode;
+    }
+
+    if(err) {
+      return err;
+    }
+  }
+
+  ManagerHost.prototype.getServiceInstanceURL = function() {
+    return this.toURL() + '/api/ServiceInstances';
   }
 };

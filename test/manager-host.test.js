@@ -95,20 +95,20 @@ describe('ManagerHost', function () {
         test.host.sync(function() {
           test.altHost.sync(function() {
             expect(test.host.processes.pids).to.not.eql(test.altHost.processes.pids);
-            test.ManagerHost.find(function(err, hosts) {
-              expect(hosts.length).to.equal(2);
-              var host = hosts[0];
-              var altHost = hosts[1];
+            var host = test.host;
+            var altHost = test.altHost;
 
-              host.debug('-----pids--------');
-              host.debug(host.processes.pids);
+            expect(host.processes.pids).to.eql([]);
+            expect(altHost.processes.pids.length > 0).to.be.ok;
 
-              altHost.debug('-----pids--------');
-              altHost.debug(altHost.processes.pids);
+            host.debug('-----pids--------');
+            host.debug(host.processes.pids);
 
-              expect(host.processes.pids).to.not.eql(altHost.processes.pids);
-              done();
-            });
+            altHost.debug('-----pids--------');
+            altHost.debug(altHost.processes.pids);
+
+            expect(host.processes.pids).to.not.eql(altHost.processes.pids);
+            done();
           });
         });
       });
@@ -124,6 +124,8 @@ describe('ManagerHost', function () {
         expect(host.error).to.not.exist;
         expect(host.actions).to.contain('delete');
         expect(host.actions).to.contain('edit');
+        expect(host.actions).to.contain('env-set');
+        expect(host.actions).to.contain('env-get');
         done();
       });
     });
