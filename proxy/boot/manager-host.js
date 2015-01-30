@@ -205,6 +205,7 @@ module.exports = function setupHooks(server) {
   }
 
   ManagerHost.prototype.setActions = function() {
+    var host = this;
     var procs = this.processes;
     var hasPids = procs && procs.pids && procs.pids.length;
     var hasApp = this.app;
