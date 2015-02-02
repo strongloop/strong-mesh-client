@@ -74,9 +74,10 @@ module.exports = function setupHooks(server) {
       }
 
       request({
-        url: host.toURL() + '/api/ServiceInstances/' + inst.id + '/processes',
+        url: host.toURL() + '/api/ServiceInstances/' + inst.id
+        + '/processes?filter[where][stopTime]=null',
         json: true,
-        verb: 'GET'
+        method: 'GET'
       }, function(err, res, body) {
         var processes = body;
         
@@ -141,7 +142,7 @@ module.exports = function setupHooks(server) {
     request({
       url: this.getServiceInstanceURL() + '/findOne',
       json: true,
-      verb: 'GET'
+      method: 'GET'
     }, function(err, res, body) {
       err = host.getHttpError(err, res, body);
       if(err) {
@@ -235,7 +236,7 @@ module.exports = function setupHooks(server) {
           body: {
             request: req
           },
-          verb: 'POST'
+          method: 'POST'
         }, function(err, res, body) {
           err = host.getHttpError(err, res, body);
           if(err) {
