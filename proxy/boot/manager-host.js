@@ -202,7 +202,7 @@ module.exports = function setupHooks(server) {
         return 'server'
       }
     }
-    if(msg.indexOf('ENOTFOUND') > -1 ||  msg.indexOf('ECONNREFUSED')) {
+    if(msg && msg.indexOf('ENOTFOUND') > -1 ||  msg.indexOf('ECONNREFUSED') > -1) {
       return 'connection';
     }
     return 'unknown';
