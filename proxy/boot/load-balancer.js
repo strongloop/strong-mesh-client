@@ -42,7 +42,7 @@ module.exports = function(server) {
 
     // TODO(ritch) this is going to block and be incredibly slow...
     boot(client, {
-      appRootDir: path.join(path.dirname(require.resolve('strong-arc-lb')))
+      appRootDir: path.join(path.dirname(require.resolve('strong-nginx-controller')))
     });
 
     client.models.Config.attachTo(remote);

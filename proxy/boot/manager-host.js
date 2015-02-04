@@ -15,6 +15,7 @@ module.exports = function setupHooks(server) {
     this.id = uuid.v4();
     this.protocol = this.protocol || 'http';
     debug('creating host %s:%s', host.host, host.port);
+    if(!this.actions) this.actions = [];
     next();
   }
 
@@ -36,13 +37,27 @@ module.exports = function setupHooks(server) {
           }
 
           host.setActions();
-          host.save(function(err) {
-            if(err) {
-              return cb(err);
+          ManagerHost.findById(host.id, function(err, cur) {
+            if(err) return cb(err);
+            if(cur) {
+              if(!(cur.host === host.host && cur.port === host.port)) {
+                // throw out the sync result
+                return cb();
+              }
+            } else {
+              // throw out the sync result
+              // since the host no longer exists
+              return cb();
             }
-            if(Change.revisionForInst(host) !== originalRev) {
-              ManagerHost.emit('host changed', host);
-            }
+
+            host.save(function(err) {
+              if(err) {
+                return cb(err);
+              }
+              if(Change.revisionForInst(host) !== originalRev) {
+                ManagerHost.emit('host changed', host);
+              }
+            });
           });
         });
       }, cb);
@@ -80,7 +95,7 @@ module.exports = function setupHooks(server) {
         method: 'GET'
       }, function(err, res, body) {
         var processes = body;
-        
+
         err = host.getHttpError(err, res, body);
 
         if(err) {
@@ -115,14 +130,14 @@ module.exports = function setupHooks(server) {
       connector: 'remote',
       url: this.toURL() + '/api'
     });
-    
+
     // TODO(ritch) this is going to block and be incredibly slow...
     boot(client, {
       appRootDir: path.join(path.dirname(require.resolve('strong-pm')), 'lib', 'client')
     });
 
     ds.connector.remotes.before('**', before);
-    
+
     function before(ctx, next) {
       var u = url.parse(ctx.req.url);
       u.hostname = host.host;
@@ -147,7 +162,7 @@ module.exports = function setupHooks(server) {
       err = host.getHttpError(err, res, body);
       if(err) {
         return cb(err);
-      } 
+      }
       cb(null, body);
     });
   }

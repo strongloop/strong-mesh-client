@@ -15,6 +15,9 @@ module.exports = function createServer(configFile, options) {
 
   boot(server, __dirname);
 
+  var ManagerHost = server.models.ManagerHost;
+  var LoadBalancer = server.models.LoadBalancer;
+
   server.setupPrimus = function(httpServer, options) {
     options = options || {};
     options.transformer = options.transformer || 'engine.io';
@@ -37,10 +40,10 @@ module.exports = function createServer(configFile, options) {
 
   server.use(loopback.rest());
 
-  server.models.ManagerHost.startPolling();
+  ManagerHost.startPolling();
 
-  server.models.ManagerHost.find(function(err, hosts) {
-    server.models.LoadBalancer.updateAllConifgs(hosts);
+  ManagerHost.find(function(err, hosts) {
+    LoadBalancer.updateAllConifgs(hosts);
   });
 
   server.models.ManagerHost.on('host changed', function(host) {
@@ -54,10 +57,19 @@ module.exports = function createServer(configFile, options) {
       });
     }
     setTimeout(function() {
-      server.models.ManagerHost.find(function(err, hosts) {
-        server.models.LoadBalancer.updateAllConifgs(hosts);
-      });
+      updateBalancers();
     }, 2000);
+
+    function updateBalancers() {
+      ManagerHost.find(function(err, hosts) {
+        LoadBalancer.updateAllConifgs(hosts);
+      });
+    }
+
+    ManagerHost.observe('after delete', function(ctx, next) {
+      updateBalancers();
+      next();
+    });
   });
 
   return server;
