@@ -42,9 +42,7 @@ module.exports = function createServer(configFile, options) {
 
   ManagerHost.startPolling();
 
-  ManagerHost.find(function(err, hosts) {
-    LoadBalancer.updateAllConifgs(hosts);
-  });
+  updateBalancers();
 
   server.models.ManagerHost.on('host changed', function(host) {
     if(server.primus) {
@@ -56,19 +54,29 @@ module.exports = function createServer(configFile, options) {
         }
       });
     }
-    setTimeout(function() {
-      updateBalancers();
-    }, 2000);
 
-    function updateBalancers() {
-      ManagerHost.find(function(err, hosts) {
-        LoadBalancer.updateAllConifgs(hosts);
+    updateBalancers();
+  });
+
+  function updateBalancers() {
+    ManagerHost.find(function(err, hosts) {
+      LoadBalancer.updateAllConifgs(hosts);
+    });
+  }
+
+  ManagerHost.observe('after delete', function(ctx, next) {
+    updateBalancers();
+    next();
+  });
+
+  LoadBalancer.observe('after save', function(ctx, next) {
+    ManagerHost.find(function(err, hosts) {
+      if(err) return next(err);
+      var validHosts = LoadBalancer.getValidHosts(hosts);
+      LoadBalancer.findById(ctx.instance.id, function(err, balancer) {
+        if(err) return next(err);
+        balancer.updateConfig(validHosts, next);
       });
-    }
-
-    ManagerHost.observe('after delete', function(ctx, next) {
-      updateBalancers();
-      next();
     });
   });
 

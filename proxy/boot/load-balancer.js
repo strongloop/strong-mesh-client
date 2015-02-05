@@ -10,21 +10,27 @@ module.exports = function(server) {
     LoadBalancer.find(function(err, balancers) {
       if(err) return cb(err);
 
-      var validHosts = [];
-
-      hosts.forEach(function(host) {
-        if(!host.error && host.host && host.app && host.app.port) {
-          validHosts.push({
-            host: host.host,
-            port: host.app.port
-          });
-        }
-      });
+      var validHosts = LoadBalancer.getValidHosts(hosts);
 
       async.each(balancers, function(balancer, cb) {
         balancer.updateConfig(validHosts, cb);
       }, cb);
     });
+  }
+
+  LoadBalancer.getValidHosts = function(hosts) {
+    var validHosts = [];
+
+    hosts.forEach(function(host) {
+      if(!host.error && host.host && host.app && host.app.port) {
+        validHosts.push({
+          host: host.host,
+          port: host.app.port
+        });
+      }
+    });
+
+    return validHosts;
   }
 
   LoadBalancer.prototype.updateConfig = function(hosts, cb) {
