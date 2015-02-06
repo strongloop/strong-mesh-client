@@ -1,0 +1,12 @@
+{
+  "ids": {
+    "ManagerHost": 2,
+    "LoadBalancer": 1
+  },
+  "models": {
+    "ManagerHost": {
+      "0625f3fa-4f8c-4775-8951-acda319a04de": "{\"id\":\"0625f3fa-4f8c-4775-8951-acda319a04de\",\"host\":\"localhost\",\"port\":5000,\"actions\":[\"delete\",\"edit\",\"env-set\",\"env-get\"],\"protocol\":\"http\",\"error\":null,\"errorType\":null,\"app\":null,\"processes\":{\"pids\":[]}}"
+    },
+    "LoadBalancer": {}
+  }
+}

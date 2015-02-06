@@ -2,7 +2,13 @@ var path = require('path');
 var SANDBOX = path.join(__dirname, 'sandbox');
 var fs = require('fs-extra');
 var spawn = require('child_process').spawn;
-var expect = require('chai').expect;
+var expect = require('chai').expect
+var helpers = require('./helpers');
+var createPM = helpers.createPM;
+var createSandbox = helpers.createSandbox;
+var removeSandBox = helpers.removeSandBox;
+var deployTo = helpers.deployTo;
+var sleep = helpers.sleep;
 
 var testPM = {
   host: 'localhost',
@@ -62,14 +68,14 @@ describe('ManagerHost', function () {
     it('should find the newly added host', function (done) {
       this.ManagerHost.find(function(err, hosts) {
         expect(hosts.length).to.eql(1);
-        expect(hosts[0].port).to.eql(PM_PORT); 
+        expect(hosts[0].port).to.eql(PM_PORT);
         done();
       });
     });
     describe('multiple PMs', function () {
       beforeEach(function() {
         this.altPM = createPM(ALT_PM_PORT);
-      });  
+      });
       beforeEach(function(done) {
         this.altPM.on('message', function(msg) {
           if(msg.data.cmd === 'listening') {
@@ -88,7 +94,7 @@ describe('ManagerHost', function () {
       beforeEach(function(done) {
         deployTo(altTestPM, done);
       });
-      beforeEach(sleep(5000));
+      beforeEach(sleep(7500));
       it('should have a unique set of pids', function (done) {
         var test = this;
 
@@ -161,49 +167,8 @@ describe('ManagerHost', function () {
       }, function(err) {
         expect(err).to.exist;
         done();
-      })
+      });
     });
   });
 });
 
-function createPM(port) {
-  var dir = path.join(SANDBOX, port.toString());
-  fs.mkdirSync(dir);
-  var PATH_TO_PM = path.join(path.dirname(require.resolve('strong-pm')), 'bin', 'sl-pm.js');
-  return spawn(PATH_TO_PM, ['--listen', port], {
-    cwd: dir,
-    stdio:  ['ignore', process.stdout, process.stderr, 'ipc']
-  });
-}
-
-function createSandbox() {
-  removeSandBox();
-  fs.mkdirSync(SANDBOX);
-}
-
-function removeSandBox() {
-  fs.removeSync(SANDBOX);
-}
-
-function deployTo(pm, cb) {
-  var PATH_TO_DEPLOY = path.join(path.dirname(require.resolve('strong-deploy')), 'bin', 'sl-deploy.js');
-  var tarball = path.join(__dirname, 'fixtures', 'sample-app.tgz');
-  var pmURL = 'http://' + pm.host + ':' + pm.port;
-  var deploy = spawn(PATH_TO_DEPLOY, [pmURL, tarball], {
-    stdio:  ['ignore', process.stdout, process.stderr, 'ipc']
-  });
-
-  deploy.on('exit', function(code) {
-    if(code) {
-      cb(new Error('failed to deploy'));
-    } else {
-      cb();
-    }
-  });
-}
-
-function sleep(ms) {
-  return function(done) {
-    setTimeout(done, ms);
-  }
-}

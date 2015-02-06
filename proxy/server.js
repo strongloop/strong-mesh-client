@@ -60,6 +60,7 @@ module.exports = function createServer(configFile, options) {
 
   function updateBalancers() {
     ManagerHost.find(function(err, hosts) {
+      if(err) return console.error(err);
       LoadBalancer.updateAllConifgs(hosts);
     });
   }
