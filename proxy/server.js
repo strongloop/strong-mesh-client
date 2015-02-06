@@ -2,6 +2,7 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 var buildBrowserBundle = require('./build-client');
 var Primus = require('primus')
+var debug = require('debug')('strong-mesh-client:server');
 
 module.exports = function createServer(configFile, options) {
   var server = loopback();
@@ -45,6 +46,8 @@ module.exports = function createServer(configFile, options) {
   updateBalancers();
 
   server.models.ManagerHost.on('host changed', function(host) {
+    debug('host changed %j', host);
+
     if(server.primus) {
       server.primus.write({
         event: 'host changed',
@@ -61,11 +64,13 @@ module.exports = function createServer(configFile, options) {
   function updateBalancers() {
     ManagerHost.find(function(err, hosts) {
       if(err) return console.error(err);
+      debug('updating all balancers with raw hosts %j', hosts);
       LoadBalancer.updateAllConifgs(hosts);
     });
   }
 
   ManagerHost.observe('after delete', function(ctx, next) {
+    debug('manager host deleted');
     updateBalancers();
     next();
   });
