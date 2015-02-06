@@ -2,6 +2,7 @@ var async = require('async');
 var loopback = require('loopback');
 var path = require('path');
 var boot = require('loopback-boot');
+var debug = require('debug')('strong-mesh-client:LoadBalancer');
 
 module.exports = function(server) {
   var LoadBalancer = server.models.LoadBalancer;
@@ -10,11 +11,20 @@ module.exports = function(server) {
     LoadBalancer.find(function(err, balancers) {
       if(err) return cb(err);
 
-      var validHosts = LoadBalancer.getValidHosts(hosts);
+      debug('found LoadBalancers to update %j', balancers);
 
-      async.each(balancers, function(balancer, cb) {
-        balancer.updateConfig(validHosts, cb);
-      }, cb);
+
+      async.each(hosts, function(host, cb) {
+        host.sync(cb);
+      }, function(err) {
+        var validHosts = LoadBalancer.getValidHosts(hosts);
+
+        async.each(balancers, function(balancer, cb) {
+          balancer.updateConfig(validHosts, cb);
+        }, cb);
+      });
+
+
     });
   }
 
@@ -27,6 +37,8 @@ module.exports = function(server) {
           host: host.host,
           port: host.app.port
         });
+      } else {
+        debug('invalid host %j', host.app);
       }
     });
 
@@ -35,6 +47,7 @@ module.exports = function(server) {
 
   LoadBalancer.prototype.updateConfig = function(hosts, cb) {
     // call remote method with hosts...
+    debug('updating config for %s %j', this.toURL(), hosts);
     this.createClient().models.Config.setEndpoints(hosts, cb);
   }
 

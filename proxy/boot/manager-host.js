@@ -108,10 +108,25 @@ module.exports = function setupHooks(server) {
         host.processes = host.processes || {};
         host.processes.pids = processes;
 
-        var listeningSockets = processes && processes[0] && processes[0].listeningSockets;
+        var port;
 
-        var port = listeningSockets && listeningSockets[0] && listeningSockets[0].port
+        if(processes) {
+          for (var i = 0; i < processes.length; i++) {
+            var listeningSockets = processes && processes[i]
+              && processes[i].listeningSockets;
 
+            if(listeningSockets) {
+              for (var j = 0; j < listeningSockets.length; j++) {
+                if(listeningSockets[j] && listeningSockets[j].addressType === 4) {
+                  port = listeningSockets[j].port;
+                  break;
+                }
+              };
+            } else {
+              debug('no listening sockets found for', host.toURL());
+            }
+          };
+        }
         if(host.app && port) {
           host.app.port = port;
         }
