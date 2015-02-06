@@ -44,7 +44,7 @@ Interact with mesh from the browser via the proxy.
 var mesh = require('strong-mesh-client')('http://localhost:3000');;
 
 // get notifications when hosts change
-mesh.notifications.on('hosts changed', function() {
+mesh.notifications.on('host changed', function() {
   mesh.ManagerHost.find(function(err, hosts) {
     $scope.hosts = hosts;
     $scope.$apply();
@@ -66,9 +66,6 @@ ManagerHost.deleteById('...', cb);
 managerHost.action({
   cmd: 'stop'
 }, cb);
-
-// global action (iterates over all valid hosts)
-ManagerHost.action('restart', cb);
 ```
 
 ## Models
