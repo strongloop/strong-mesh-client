@@ -8,16 +8,27 @@ module.exports = function setupHooks(server) {
   var boot = require('loopback-boot');
   var async = require('async');
   var path = require('path');
-  var debug = require('debug')('ManagerHost');
+  var debug = require('debug')('strong-mesh-client:ManagerHost');
 
   ManagerHost.beforeCreate = function(next) {
     var host = this;
     this.id = uuid.v4();
     this.protocol = this.protocol || 'http';
+    this.created = Date.now();
     debug('creating host %s:%s', host.host, host.port);
     if(!this.actions) this.actions = [];
     next();
   }
+
+  ManagerHost.beforeRemote('find', function(ctx) {
+    var next = arguments[arguments.length - 1];
+    ctx.args.filter = ctx.args.filter || {};
+
+    // force sorting
+    if(!ctx.args.filter.order) ctx.args.filter.order = 'created ASC';
+
+    next();
+  });
 
   ManagerHost.startPolling = function() {
     ManagerHost.sync();
