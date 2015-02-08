@@ -6,6 +6,7 @@ var spawn = require('child_process').spawn;
 var expect = require('chai').expect;
 
 exports.createPM = createPM;
+exports.SANDBOX = SANDBOX;
 exports.createSandbox = createSandbox;
 exports.createController = createController;
 exports.removeSandBox = removeSandBox;
