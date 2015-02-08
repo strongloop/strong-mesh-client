@@ -24,6 +24,7 @@ module.exports = function createServer(configFile, options) {
     options.transformer = options.transformer || 'engine.io';
     server.primus = new Primus(httpServer, options);
     server.primusClient = server.primus.library();
+    server.primusClient = server.primus.library();
   }
 
   server.get('/client.js', function(req, res) {

@@ -25,9 +25,10 @@ module.exports = function buildBrowserBundle(env, out, callback) {
   }
 
   b.bundle()
-    .on('error', callback)
+    .on('error', function(err) {
+      callback(err);
+    })
     .pipe(out);
 
-  out.on('error', callback);
   out.on('close', callback);
 };
