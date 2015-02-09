@@ -62,10 +62,13 @@ module.exports = function createServer(configFile, options) {
   });
 
   function updateBalancers() {
-    ManagerHost.find(function(err, hosts) {
+    ManagerHost.sync(function(err) {
       if(err) return console.error(err);
-      debug('updating all balancers with raw hosts %j', hosts);
-      LoadBalancer.updateAllConifgs(hosts);
+      ManagerHost.find(function(err, hosts) {
+        if(err) return console.error(err);
+        debug('updating all balancers with raw hosts %j', hosts);
+        LoadBalancer.updateAllConifgs(hosts);
+      });
     });
   }
 
