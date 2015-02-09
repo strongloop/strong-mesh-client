@@ -71,6 +71,7 @@ module.exports = function setupHooks(server) {
               if(Change.revisionForInst(host) !== originalRev) {
                 ManagerHost.emit('host changed', host);
               }
+              cb();
             });
           });
         });

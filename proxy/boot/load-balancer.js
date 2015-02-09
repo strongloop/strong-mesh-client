@@ -14,17 +14,11 @@ module.exports = function(server) {
       debug('found LoadBalancers to update %j', balancers);
 
 
-      async.each(hosts, function(host, cb) {
-        host.sync(cb);
-      }, function(err) {
-        var validHosts = LoadBalancer.getValidHosts(hosts);
+      var validHosts = LoadBalancer.getValidHosts(hosts);
 
-        async.each(balancers, function(balancer, cb) {
-          balancer.updateConfig(validHosts, cb);
-        }, cb);
-      });
-
-
+      async.each(balancers, function(balancer, cb) {
+        balancer.updateConfig(validHosts, cb);
+      }, cb);
     });
   }
 
@@ -38,7 +32,7 @@ module.exports = function(server) {
           port: host.app.port
         });
       } else {
-        debug('invalid host %j', host.app);
+        debug('invalid host %j', host);
       }
     });
 
