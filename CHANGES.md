@@ -1,4 +1,10 @@
-2015-02-09, Version 1.3.2
+2015-02-11, Version 1.3.3
+=========================
+
+ * Ensure sync is persisted before updating load balancers (Ritchie Martori)
+
+
+2015-02-08, Version 1.3.2
 =========================
 
  * Fix typo (Ritchie Martori)
