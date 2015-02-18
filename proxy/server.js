@@ -32,8 +32,8 @@ module.exports = function createServer(configFile, options) {
 
     buildBrowserBundle(process.env.NODE_ENV, res, function(err) {
       if(err) {
-        res.status(500).send(err);
-      } else {
+        console.error('(strong-mesh-client) Error building client.js');
+        console.error(err.stack || err.message);
         res.end();
       }
     });
