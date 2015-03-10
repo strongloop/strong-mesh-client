@@ -1,3 +1,9 @@
+2015-03-10, Version 1.3.5
+=========================
+
+ * Remove browserify fork reference (Ritchie Martori)
+
+
 2015-02-18, Version 1.3.4
 =========================
 
@@ -21,6 +27,14 @@
 
 
 2015-02-06, Version 1.3.1
+=========================
+
+ * Fix incorrect app.port (Ritchie Martori)
+
+ * Add contributing details (Ritchie Martori)
+
+
+2015-02-06, Version 1.3.0
 =========================
 
  * First release!
