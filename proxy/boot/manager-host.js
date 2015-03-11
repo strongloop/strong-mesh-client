@@ -271,23 +271,32 @@ module.exports = function setupHooks(server) {
   ManagerHost.prototype.action = function(req, cb) {
     var host = this;
     this.getServiceInstance(function(err, inst) {
-      if(err) return cb(err);
-      if(inst) {
+      if (err) return cb(err);
+      if (inst) {
         host.debug('performing action:');
         host.debug(req);
-        request({
-          url: host.getServiceInstanceURL() + '/' + inst.id + '/actions',
-          json: true,
-          body: {
-            request: req
-          },
-          method: 'POST'
-        }, function(err, res, body) {
-          err = host.getHttpError(err, res, body);
-          if(err) {
+        ManagerHost.notifyObserversOf('before action', {
+          Model: ManagerHost,
+          instance: host,
+          service: inst,
+          data: req}, function(err) {
+          if (err) {
             return cb(err);
           }
-          cb(null, body);
+          request({
+            url: host.getServiceInstanceURL() + '/' + inst.id + '/actions',
+            json: true,
+            body: {
+              request: req
+            },
+            method: 'POST'
+          }, function(err, res, body) {
+            err = host.getHttpError(err, res, body);
+            if (err) {
+              return cb(err);
+            }
+            cb(null, body);
+          });
         });
       } else {
         cb(new Error('no instance available'));
