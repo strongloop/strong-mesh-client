@@ -144,10 +144,9 @@ describe('ManagerHost', function () {
         done();
       });
 
-      test.host.action({
-        cmd: 'set-size',
-        size: 1
-      }, done);
+      deployTo(altTestPM, function() {
+        // deployed!
+      });
     });
   });
 
