@@ -1,6 +1,6 @@
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-var buildBrowserBundle = require('./build-client');
+var browserBundle = require('./build-client');
 var Primus = require('primus')
 var debug = require('debug')('strong-mesh-client:server');
 
@@ -30,9 +30,19 @@ module.exports = function createServer(configFile, options) {
     res.set('Content-Type', 'application/javascript');
     res.write(server.primusClient, 'utf-8');
 
-    buildBrowserBundle(process.env.NODE_ENV, res, function(err) {
+    browserBundle.getBundle(res, './client.map.json', function(err) {
       if(err) {
-        console.error('(strong-mesh-client) Error building client.js');
+        console.error('(strong-mesh-client) client.map.json is not available');
+        console.error(err.stack || err.message);
+        res.end();
+      }
+    });
+  });
+
+  server.get('/client.map.json', function(req, res) {
+    browserBundle.getBundleMap(res, function(err) {
+      if(err) {
+        console.error('(strong-mesh-client) Error building client.map.json');
         console.error(err.stack || err.message);
         res.end();
       }

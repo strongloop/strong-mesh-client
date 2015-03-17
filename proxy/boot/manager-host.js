@@ -197,10 +197,6 @@ module.exports = function setupHooks(server) {
     });
   }
 
-  ManagerHost.prototype.toURL = function() {
-    return this.protocol + '://' + this.host + ':' + this.port;
-  }
-
   ManagerHost.prototype.getAuthString = function() {
     var credentials = this.credentials;
     if(credentials && credentials.username && credentials.password) {
