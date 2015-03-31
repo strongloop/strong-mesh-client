@@ -47,6 +47,7 @@ function getCachedBundleMap(out, callback) {
 
 exports.getBundle = getCachedBundleOrBuild;
 exports.getBundleMap = getCachedBundleMap;
+exports.buildBrowserBundle = buildBrowserBundle;
 
 function getCachedBundle(bundlePath, out, callback) {
   debug('loading cached bundle: %s', bundlePath);
