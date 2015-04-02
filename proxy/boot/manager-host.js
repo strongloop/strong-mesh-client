@@ -259,7 +259,7 @@ module.exports = function setupHooks(server) {
     actions.push('env-set', 'env-get');
 
     if(hasPids) {
-      actions.push('stop', 'restart', 'cluster-restart');
+      actions.push('stop', 'restart', 'cluster-restart', 'license-push');
     } else if(hasApp) {
       host.debug('limiting actions due to no pids found');
       actions.push('start');
