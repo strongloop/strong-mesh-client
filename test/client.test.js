@@ -1,4 +1,4 @@
-var buildBrowserBundle = require('../proxy/build-client');
+var buildBrowserBundle = require('../proxy/build-client').buildBrowserBundle;
 var helpers = require('./helpers');
 var fs = require('fs');
 var path = require('path');
@@ -10,6 +10,6 @@ describe('client', function () {
   });
   it('should be generated', function (done) {
     var file = fs.createWriteStream(path.join(helpers.SANDBOX, 'testout.js'));
-    buildBrowserBundle('test', file, done);
+    buildBrowserBundle(file, '/path/to/map', done);
   });
 });
