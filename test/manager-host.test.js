@@ -29,9 +29,11 @@ var ALT_PM_PORT = altTestPM.port;
 describe('ManagerHost', function () {
 
   this.timeout(0);
+  var lastStarted;
 
   beforeEach(function (done) {
     createSandbox();
+    lastStarted = process.hrtime();
     this.pm = createPM(PM_PORT);
     var proxy = this.proxy = require('../proxy/server')(path.join(SANDBOX, 'config.json'));
     this.ManagerHost = proxy.models.ManagerHost;
@@ -59,9 +61,19 @@ describe('ManagerHost', function () {
   });
 
   afterEach(function(done) {
-    removeSandBox();
-    this.pm.kill('SIGTERM');
-    this.pm.on('exit', done);
+    var test = this;
+    if (process.hrtime(lastStarted)[0] < 5) {
+      setTimeout(cleanup, 5000);
+    } else {
+      setImmediate(cleanup);
+    }
+    function cleanup() {
+      test.pm.kill('SIGTERM');
+      test.pm.on('exit', function() {
+        removeSandBox();
+        done();
+      });
+    }
   });
 
   describe('ManagerHost.find()', function () {
