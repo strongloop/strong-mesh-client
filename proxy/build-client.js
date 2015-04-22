@@ -50,6 +50,8 @@ exports.getBundleMap = getCachedBundleMap;
 exports.buildBrowserBundle = buildBrowserBundle;
 
 function getCachedBundle(bundlePath, out, callback) {
+  if (!out) return callback();
+
   debug('loading cached bundle: %s', bundlePath);
   var cachedFile = fs.createReadStream(bundlePath);
   cachedFile.on('error', callback);
@@ -137,4 +139,10 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
     .pipe(out);
 
   out.on('close', callback);
+}
+
+if (require.main === module) {
+  return buildAndCacheBundle(bundlePath, './client.map.json', null, function(err) {
+    console.log('bundle rebuilt');
+  });
 }
