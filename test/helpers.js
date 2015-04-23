@@ -16,7 +16,8 @@ exports.sleep = sleep;
 function createPM(port) {
   var dir = path.join(SANDBOX, port.toString());
   fs.mkdirSync(dir);
-  var PATH_TO_PM = path.join(path.dirname(require.resolve('strong-pm')), 'bin', 'sl-pm.js');
+  var PATH_TO_PM = require.resolve('strong-pm/bin/sl-pm.js');
+  process.env.STRONGLOOP_CLUSTER = '1';
   return spawn(PATH_TO_PM, ['--listen', port], {
     cwd: dir,
     stdio:  ['ignore', process.stdout, process.stderr, 'ipc']
