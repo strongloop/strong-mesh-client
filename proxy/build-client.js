@@ -77,7 +77,7 @@ function buildAndCacheBundle(bundlePath, sourceMapUrl, out, callback) {
 
 function buildBrowserBundle(out, sourceMapUrl, callback) {
   var clientDir = path.join(__dirname, '..', 'browser-client');
-  var meshClientDir = path.join(__dirname, '..', 'node_modules', 'strong-mesh-models');
+  var meshModelsDir = path.dirname(require.resolve('strong-mesh-models'));
 
   var b = browserify({
     basedir: clientDir,
@@ -88,7 +88,7 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
   b.require(path.join(clientDir, 'client.js'), { expose: 'strong-mesh-client' });
 
   // Include mesh-models, exclude non-browser requirements
-  b.require(path.join(meshClientDir,'index.js'), { expose: 'strong-mesh-models' });
+  b.require(path.join(meshModelsDir,'index.js'), { expose: 'strong-mesh-models' });
   var nonBrowserReq = [
     'minkelite', 'compression', 'concat-stream', 'errorhandler', 'sprintf',
     'loopback-explorer', 'osenv', 'posix-getopt', 'serve-favicon', 'user-home',
@@ -111,10 +111,10 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
   try {
     boot.compileToBrowserify({
       appId: 'meshClient',
-      appRootDir: path.join(meshClientDir, 'client'),
+      appRootDir: path.join(meshModelsDir, 'client'),
       modelSources: [
-        path.join(meshClientDir, 'common', 'models'),
-        path.join(meshClientDir, 'client', 'models'),
+        path.join(meshModelsDir, 'common', 'models'),
+        path.join(meshModelsDir, 'client', 'models'),
       ],
       env: nodeEnv
     }, b);
