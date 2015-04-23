@@ -13,8 +13,10 @@ exports.removeSandBox = removeSandBox;
 exports.deployTo = deployTo;
 exports.sleep = sleep;
 
+var count = 0;
 function createPM(port) {
-  var dir = path.join(SANDBOX, port.toString());
+  var dir = path.join(SANDBOX, count.toString());
+  count += 1;
   fs.mkdirSync(dir);
   var PATH_TO_PM = require.resolve('strong-pm/bin/sl-pm.js');
   process.env.STRONGLOOP_CLUSTER = '1';
@@ -25,7 +27,8 @@ function createPM(port) {
 }
 
 function createController(port) {
-  var dir = path.join(SANDBOX, port.toString());
+  var dir = path.join(SANDBOX, count.toString());
+  count += 1;
   fs.mkdirSync(dir);
   var PATH_TO_CONTROLLER = path.join(path.dirname(require.resolve('strong-nginx-controller')), '..', 'bin', 'sl-nginx-ctl.js');
   var PATH_TO_NGINX = sh.which('nginx');
