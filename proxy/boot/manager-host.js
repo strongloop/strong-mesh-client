@@ -163,7 +163,7 @@ module.exports = function setupHooks(server) {
 
     // TODO(ritch) this is going to block and be incredibly slow...
     boot(client, {
-      appRootDir: path.join(path.dirname(require.resolve('strong-pm')), 'lib', 'client')
+      appRootDir: path.join(path.dirname(require.resolve('strong-mesh-models')), 'client')
     });
 
     ds.connector.remotes.before('**', before);

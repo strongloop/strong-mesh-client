@@ -12,27 +12,26 @@ var sleep = helpers.sleep;
 
 var testPM = {
   host: 'localhost',
-  port: 8000
+  port: 0,
 };
 var altTestPM = {
   host: 'localhost',
-  port: 9000
+  port: 0,
 };
 var invalidPM = {
   host: 'invalid',
-  port: 2222
+  port: 1,
 };
-
-var PM_PORT = testPM.port;
-var ALT_PM_PORT = altTestPM.port;
 
 describe('ManagerHost', function () {
 
   this.timeout(0);
+  var lastStarted;
 
   beforeEach(function (done) {
     createSandbox();
-    this.pm = createPM(PM_PORT);
+    lastStarted = process.hrtime();
+    this.pm = createPM(0);
     var proxy = this.proxy = require('../proxy/server')(path.join(SANDBOX, 'config.json'));
     this.ManagerHost = proxy.models.ManagerHost;
     done();
@@ -41,6 +40,7 @@ describe('ManagerHost', function () {
   beforeEach(function(done) {
     this.pm.on('message', function(msg) {
       if(msg.data.cmd === 'listening') {
+        testPM.port = msg.data.port;
         done();
       }
     });
@@ -48,10 +48,7 @@ describe('ManagerHost', function () {
 
   beforeEach(function(done) {
     var test = this;
-    this.proxy.models.ManagerHost.create({
-      host: 'localhost',
-      port: PM_PORT
-    }, function(err, host) {
+    this.proxy.models.ManagerHost.create(testPM, function(err, host) {
       if(err) return done(err);
       test.host = host;
       done();
@@ -59,26 +56,37 @@ describe('ManagerHost', function () {
   });
 
   afterEach(function(done) {
-    removeSandBox();
-    this.pm.kill('SIGTERM');
-    this.pm.on('exit', done);
+    var test = this;
+    if (process.hrtime(lastStarted)[0] < 5) {
+      setTimeout(cleanup, 5000);
+    } else {
+      setImmediate(cleanup);
+    }
+    function cleanup() {
+      test.pm.kill('SIGTERM');
+      test.pm.on('exit', function() {
+        removeSandBox();
+        done();
+      });
+    }
   });
 
   describe('ManagerHost.find()', function () {
     it('should find the newly added host', function (done) {
       this.ManagerHost.find(function(err, hosts) {
         expect(hosts.length).to.eql(1);
-        expect(hosts[0].port).to.eql(PM_PORT);
+        expect(hosts[0].port).to.eql(testPM.port);
         done();
       });
     });
     describe('multiple PMs', function () {
       beforeEach(function() {
-        this.altPM = createPM(ALT_PM_PORT);
+        this.altPM = createPM(0);
       });
       beforeEach(function(done) {
         this.altPM.on('message', function(msg) {
           if(msg.data.cmd === 'listening') {
+            altTestPM.port = msg.data.port;
             done();
           }
         });
