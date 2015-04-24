@@ -96,11 +96,15 @@ module.exports = function setupHooks(server) {
         return cb(err);
       }
 
-      if(inst.applicationName && inst.npmModules) {
+      if(inst.applicationName) {
         host.app = {
           name: inst.applicationName,
-          version: inst.npmModules.version
-        }
+          version: null
+        };
+      }
+
+      if(inst.npmModules) {
+        host.app.version = inst.npmModules.version;
       }
 
       request({
