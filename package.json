@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "jshint .",
-    "test": "mocha"
+    "test": "mocha",
+    "rebuild-client": "node proxy/build-client.js"
   },
   "dependencies": {
     "async": "^0.9.0",
