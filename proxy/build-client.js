@@ -140,9 +140,3 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
 
   out.on('close', callback);
 }
-
-if (require.main === module) {
-  return buildAndCacheBundle(bundlePath, './client.map.json', null, function(err) {
-    console.log('bundle rebuilt');
-  });
-}
