@@ -2,3 +2,5 @@ node_modules
 .strong-pm
 npm-debug.log
 test/sandbox
+proxy/mesh-client-bundle.js
+proxy/mesh-client-bundle.map.json
