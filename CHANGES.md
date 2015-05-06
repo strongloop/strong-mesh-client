@@ -1,3 +1,35 @@
+2015-05-06, Version 1.5.0
+=========================
+
+ * package: build bundle at install time (Ryan Graham)
+
+ * Update mesh-client with Express metrics changes (Krishna Raman)
+
+ * Add script to rebuild client (Krishna Raman)
+
+ * Fix app always being null in manager host (Joseph Tary)
+
+ * test: listen on ephemeral ports (Ryan Graham)
+
+ * proxy: use installed strong-mesh-models (Ryan Graham)
+
+ * deps: move strong-pm to devDependencies (Ryan Graham)
+
+ * package: upgrade fs-extra, move to devDependencies (Ryan Graham)
+
+ * test: lighten sample-app fixture (Ryan Graham)
+
+ * test: pause before cleaning up sandbox (Ryan Graham)
+
+ * make the null check work (Setogit)
+
+ * Add generated browserify bundle (Krishna Raman)
+
+ * add license-push item to action items list (Anthony Ettinger)
+
+ * Support for Arc UI to use mesh-models client (Krishna Raman)
+
+
 2015-03-12, Version 1.4.0
 =========================
 
