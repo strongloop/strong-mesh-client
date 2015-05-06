@@ -5,6 +5,7 @@
   "scripts": {
     "lint": "jshint .",
     "test": "mocha",
+    "install": "node proxy/build-client.js",
     "rebuild-client": "node proxy/build-client.js"
   },
   "dependencies": {
