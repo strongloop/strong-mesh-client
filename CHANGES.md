@@ -1,3 +1,9 @@
+2015-05-07, Version 1.5.1
+=========================
+
+ * deps: hoist jsonstream dependency of browserify (Ryan Graham)
+
+
 2015-05-06, Version 1.5.0
 =========================
 
