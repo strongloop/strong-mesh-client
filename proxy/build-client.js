@@ -142,7 +142,23 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
 }
 
 if (require.main === module) {
-  return buildAndCacheBundle(bundlePath, './client.map.json', null, function(err) {
-    console.log('bundle rebuilt');
+  var handleError = function(err) {
+    console.log('unable to generate browser bundle: ' + err.message);
+    process.exit(1);
+  };
+
+  var cachedFile = fs.createWriteStream(bundlePath);
+
+  cachedFile.on('error', handleError);
+  cachedFile.on('open', function() {
+    buildBrowserBundle(cachedFile, './client.map.json', function(err) {
+      if (err) {
+        cachedFile.close();
+        return handleError(err);
+      }
+
+      console.log('browser bundle successfully generated');
+      process.exit(0);
+    });
   });
 }
