@@ -4,7 +4,7 @@ var browserBundle = require('./build-client');
 var Primus = require('primus')
 var debug = require('debug')('strong-mesh-client:server');
 
-module.exports = function createServer(configFile, options) {
+module.exports = function createServer(configFile, options, cb) {
   var server = loopback();
   var sparks = [];
   options = options || {};
@@ -51,7 +51,14 @@ module.exports = function createServer(configFile, options) {
 
   server.use(loopback.rest());
 
-  ManagerHost.startPolling();
+  cb = cb || function defaultPollingCallback(err) {
+    if(err) {
+      err.message = 'Manager Host Polling ' + err.message;
+      throw err;
+    }
+  };
+
+  ManagerHost.startPolling(cb);
 
   updateBalancers();
 
