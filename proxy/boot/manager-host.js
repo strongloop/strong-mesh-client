@@ -40,7 +40,7 @@ module.exports = function setupHooks(server) {
   ManagerHost.sync = function(cb) {
     ManagerHost.find(function(err, hosts) {
       if(err) {
-        return cb(err);
+        return cb ? cb(err) : err;
       }
       async.each(hosts, function(host, cb) {
         var originalRev = Change.revisionForInst(host);
