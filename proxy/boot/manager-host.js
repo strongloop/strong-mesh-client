@@ -30,11 +30,21 @@ module.exports = function setupHooks(server) {
     next();
   });
 
-  ManagerHost.startPolling = function() {
-    ManagerHost.sync();
-    setInterval(function() {
-      ManagerHost.sync();
-    }, ManagerHost.settings.interval || 1000);
+  ManagerHost.startPolling = function(cb) {
+    var timer;
+    ManagerHost.sync(function(firstErr) {
+      if(firstErr) {
+        return cb ? cb(err) : null;
+      }
+      timer = setInterval(function() {
+        ManagerHost.sync(function(err) {
+          if(err) {
+            clearInterval(timer);
+            return cb(err);
+          }
+        });
+      }, ManagerHost.settings.interval || 1000);
+    });
   }
 
   ManagerHost.sync = function(cb) {
