@@ -1,3 +1,15 @@
+2015-06-04, Version 1.6.0
+=========================
+
+ * Use latest mesh-models to add tracing toggle (Krishna Raman)
+
+ * Fix startPolling error handling (Ritchie Martori)
+
+ * fix missing callback in HostManager.sync (Ryan Graham)
+
+ * Add exit codes for post-install script (Joseph Tary)
+
+
 2015-05-07, Version 1.5.1
 =========================
 
