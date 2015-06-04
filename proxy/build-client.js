@@ -94,7 +94,7 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
   var nonBrowserReq = [
     'minkelite', 'compression', 'concat-stream', 'errorhandler', 'sprintf',
     'loopback-explorer', 'osenv', 'posix-getopt', 'serve-favicon', 'user-home',
-    'strong-npm-ls', 'strong-tunnel'
+    'strong-npm-ls', 'strong-tunnel', 'http-auth'
   ];
   for (var i in nonBrowserReq) {
     b.ignore(nonBrowserReq[i]);
