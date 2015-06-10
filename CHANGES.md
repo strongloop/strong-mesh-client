@@ -1,4 +1,10 @@
-2015-06-04, Version 1.6.0
+2015-06-10, Version 1.6.1
+=========================
+
+ * Exclude http-auth dependency from browserify bundle (Krishna Raman)
+
+
+2015-06-03, Version 1.6.0
 =========================
 
  * Use latest mesh-models to add tracing toggle (Krishna Raman)
