@@ -1,3 +1,9 @@
+2015-06-19, Version 1.6.2
+=========================
+
+ * Use JSONStream, the canonical name for jsonstream (Ryan Graham)
+
+
 2015-06-10, Version 1.6.1
 =========================
 
