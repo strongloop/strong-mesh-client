@@ -1,6 +1,6 @@
 {
   "name": "strong-mesh-client",
-  "version": "1.6.2",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "lint": "jshint .",
@@ -24,7 +24,7 @@
     "primus": "^2.4.12",
     "request": "^2.51.0",
     "serve-favicon": "^2.0.1",
-    "strong-mesh-models": "^7.0.0",
+    "strong-mesh-models": "^8.0.0",
     "strong-nginx-controller": "^1.0.0"
   },
   "optionalDependencies": {
