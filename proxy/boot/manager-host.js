@@ -34,7 +34,7 @@ module.exports = function setupHooks(server) {
     var timer;
     ManagerHost.sync(function(firstErr) {
       if(firstErr) {
-        return cb ? cb(err) : null;
+        return cb ? cb(firstErr) : null;
       }
       timer = setInterval(function() {
         ManagerHost.sync(function(err) {

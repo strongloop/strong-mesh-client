@@ -9,6 +9,7 @@ var createSandbox = helpers.createSandbox;
 var removeSandBox = helpers.removeSandBox;
 var deployTo = helpers.deployTo;
 var sleep = helpers.sleep;
+var proxyServer = require('../proxy/server');
 
 var testPM = {
   host: 'localhost',
@@ -29,10 +30,11 @@ describe('ManagerHost', function () {
   var lastStarted;
 
   beforeEach(function (done) {
+    var configPath = path.join(SANDBOX, 'config.json');
     createSandbox();
     lastStarted = process.hrtime();
     this.pm = createPM(0);
-    var proxy = this.proxy = require('../proxy/server')(path.join(SANDBOX, 'config.json'));
+    var proxy = this.proxy = proxyServer(configPath, {}, console.error);
     this.ManagerHost = proxy.models.ManagerHost;
     done();
   });
