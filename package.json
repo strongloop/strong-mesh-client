@@ -44,5 +44,6 @@
     "type": "",
     "url": ""
   },
-  "description": "strong-mesh-client"
+  "description": "strong-mesh-client",
+  "license": "LicenseRef-LICENSE"
 }
