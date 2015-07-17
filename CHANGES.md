@@ -1,3 +1,9 @@
+2015-07-17, Version 1.6.3
+=========================
+
+ * Add License for mesh-client package (Krishna Raman)
+
+
 2015-06-19, Version 1.6.2
 =========================
 
