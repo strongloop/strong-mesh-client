@@ -1,3 +1,17 @@
+2015-07-27, Version 2.0.0
+=========================
+
+ * Add License for mesh-client package (Krishna Raman)
+
+ * test: dump error to stderr instead of crashing (Ryan Graham)
+
+ * proxy: fix crash on error (Ryan Graham)
+
+ * Bumping major version: breaking mesh-models update (Krishna Raman)
+
+ * Updating mesh-models to get capabilities api (Krishna Raman)
+
+
 2015-06-19, Version 1.6.2
 =========================
 
