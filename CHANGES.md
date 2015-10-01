@@ -1,3 +1,11 @@
+2015-10-01, Version 2.0.1
+=========================
+
+ * example: fix incorrect pm pid checking (Ryan Graham)
+
+ * Use strongloop conventions for licensing (Sam Roberts)
+
+
 2015-07-27, Version 2.0.0
 =========================
 
