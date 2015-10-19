@@ -1,6 +1,11 @@
 {
   "name": "strong-mesh-client",
   "version": "2.0.1",
+  "homepage": "https://github.com/strongloop/strong-mesh-client",
+  "bugs": {
+    "url": "https://github.com/strongloop/strong-mesh-client/issues"
+  },
+  "author": "StrongLoop <engineering@strongloop.com>",
   "main": "index.js",
   "scripts": {
     "lint": "jshint .",
@@ -41,8 +46,8 @@
     "strong-pm": "^3.0.0"
   },
   "repository": {
-    "type": "",
-    "url": ""
+    "type": "git",
+    "url": "git://github.com/strongloop/strong-mesh-client.git"
   },
   "description": "strong-mesh-client",
   "license": "SEE LICENSE IN LICENSE.md"
