@@ -1,6 +1,6 @@
 {
   "name": "strong-mesh-client",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "homepage": "https://github.com/strongloop/strong-mesh-client",
   "bugs": {
     "url": "https://github.com/strongloop/strong-mesh-client/issues"
