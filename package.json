@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "jshint .",
     "test": "mocha",
-    "install": "node proxy/build-client.js",
+    "postinstall": "node proxy/build-client.js",
     "rebuild-client": "node proxy/build-client.js"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "debug": "^2.1.1",
     "engine.io": "^1.5.1",
     "errorhandler": "^1.1.1",
+    "lodash": "^4.16.1",
     "loopback": "^2.8.0",
     "loopback-boot": "^2.4.0",
     "loopback-datasource-juggler": "^2.7.0",
@@ -45,6 +46,9 @@
     "strong-deploy": "^1.1.0",
     "strong-pm": "^3.0.0"
   },
+  "bundledDependencies": [
+    "lodash"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/strongloop/strong-mesh-client.git"
