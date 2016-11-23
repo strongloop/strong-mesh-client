@@ -4,7 +4,7 @@
 // restricted by GSA ADP Schedule Contract with IBM Corp.
 
 module.exports = function setupHooks(server) {
-  var uuid = require('node-uuid');
+  var uuid = require('uuid');
   var url = require('url');
   var request = require('request');
   var ManagerHost = server.models.ManagerHost;
