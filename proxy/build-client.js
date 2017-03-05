@@ -5,7 +5,6 @@
 
 var path = require('path');
 var fs = require('fs');
-var browserify = require('browserify');
 var boot = require('loopback-boot');
 var debug = require('debug')('strong-mesh-client:build-client');
 
@@ -14,25 +13,30 @@ var bundlePathBase = path.join(__dirname, 'mesh-client-bundle');
 var bundlePath = bundlePathBase + '.js';
 var bundleSourceMapPath = bundlePathBase + '.map.json';
 
-function getCachedBundleOrBuild(out, sourceMapUrl, callback) {
+function getBundle(out, sourceMapUrl, callback) {
   if (process.env.ARC_BROWSERIFY_DEBUG) {
     return buildBrowserBundle(out, null, callback);
   }
 
-  getCachedBundle(bundlePath, out, function(err) {
+  if (!out) return callback();
+
+  debug('loading cached bundle: %s', bundlePath);
+  var cachedFile = fs.createReadStream(bundlePath);
+  cachedFile.on('error', function(err) {
     if (err && err.code === 'ENOENT') {
-      return buildAndCacheBundle(
-        bundlePath,
-        sourceMapUrl,
-        out,
-        callback
-      );
+      debug('Client bundle was not pre-generated.\n' +
+        'Use `npm run rebuild-client`.');
+      throw Error('Client bundle was not pre-generated');
     }
     callback(err);
   });
+  cachedFile.on('open', function() {
+    cachedFile.pipe(out);
+    cachedFile.once('close', callback);
+  });
 }
 
-function getCachedBundleMap(out, callback) {
+function getBundleMap(out, callback) {
   var isDevEnv = ~['debug', 'development', 'test'].indexOf(nodeEnv);
   debug('isDevEnv %s %s', nodeEnv, isDevEnv);
   if (isDevEnv) {
@@ -50,41 +54,14 @@ function getCachedBundleMap(out, callback) {
   }
 }
 
-exports.getBundle = getCachedBundleOrBuild;
-exports.getBundleMap = getCachedBundleMap;
+exports.getBundle = getBundle;
+exports.getBundleMap = getBundleMap;
 exports.buildBrowserBundle = buildBrowserBundle;
-
-function getCachedBundle(bundlePath, out, callback) {
-  if (!out) return callback();
-
-  debug('loading cached bundle: %s', bundlePath);
-  var cachedFile = fs.createReadStream(bundlePath);
-  cachedFile.on('error', callback);
-  cachedFile.on('open', function() {
-    cachedFile.pipe(out);
-    cachedFile.once('close', callback);
-  });
-}
-
-function buildAndCacheBundle(bundlePath, sourceMapUrl, out, callback) {
-  debug('build cached bundle: %s', bundlePath);
-  var cachedFile = fs.createWriteStream(bundlePath);
-  cachedFile.on('error', callback);
-  cachedFile.on('open', function() {
-    buildBrowserBundle(cachedFile, sourceMapUrl, function(err) {
-      debug('cached built: %s', bundlePath);
-      if (err) {
-        cachedFile.close();
-        return callback(err);
-      }
-      getCachedBundle(bundlePath, out, callback);
-    });
-  });
-}
 
 function buildBrowserBundle(out, sourceMapUrl, callback) {
   var clientDir = path.join(__dirname, '..', 'browser-client');
   var meshModelsDir = path.dirname(require.resolve('strong-mesh-models'));
+  var browserify = require('browserify');
 
   var b = browserify({
     basedir: clientDir,
