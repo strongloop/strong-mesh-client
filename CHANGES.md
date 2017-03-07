@@ -1,3 +1,11 @@
+2017-03-07, Version 1.6.4
+=========================
+
+ * deps: replace node-uuid with uuid (Ryan Graham)
+
+ * deps: pin request@~2.79.0 (Ryan Graham)
+
+
 2015-07-17, Version 1.6.3
 =========================
 
