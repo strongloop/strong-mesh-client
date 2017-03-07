@@ -1,4 +1,12 @@
-2017-03-07, Version 1.6.4
+2017-03-07, Version 1.6.5
+=========================
+
+ * omit 'ajv' module from browser bundle (Ryan Graham)
+
+ * Revert "deps: pin request@~2.79.0" (Ryan Graham)
+
+
+2017-03-06, Version 1.6.4
 =========================
 
  * deps: replace node-uuid with uuid (Ryan Graham)
