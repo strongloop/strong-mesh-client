@@ -3,6 +3,7 @@ var fs = require('fs');
 var browserify = require('browserify');
 var boot = require('loopback-boot');
 var debug = require('debug')('strong-mesh-client:build-client');
+var exorcist = require('exorcist');
 
 var nodeEnv = process.env.NODE_ENV  || 'production';
 var bundlePathBase = path.join(__dirname, 'mesh-client-bundle');
@@ -87,6 +88,7 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
     // saved to a standalone file when !isDev(env)
     debug: true,
   });
+  b.transform({global: true}, 'uglifyify');
   b.require(path.join(clientDir, 'client.js'), { expose: 'strong-mesh-client' });
 
   // Include mesh-models, exclude non-browser requirements
@@ -125,18 +127,11 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
     return callback(err);
   }
 
-  if (bundleSourceMapPath) {
-    minifyOptions = {
-      output: bundleSourceMapPath,
-      map: sourceMapUrl,
-    };
-    b.plugin('minifyify', minifyOptions);
-  }
-
   b.bundle()
     .on('error', function(err) {
       callback(err);
     })
+    .pipe(exorcist(bundleSourceMapPath))
     .pipe(out);
 
   out.on('close', callback);
