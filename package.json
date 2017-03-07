@@ -22,7 +22,7 @@
     "minifyify": "^6.3.2",
     "node-uuid": "^1.4.2",
     "primus": "^2.4.12",
-    "request": "^2.51.0",
+    "request": "~2.79.0",
     "serve-favicon": "^2.0.1",
     "strong-mesh-models": "^7.0.0",
     "strong-nginx-controller": "^1.0.0"
