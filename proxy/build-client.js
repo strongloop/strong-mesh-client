@@ -3,6 +3,7 @@ var fs = require('fs');
 var browserify = require('browserify');
 var boot = require('loopback-boot');
 var debug = require('debug')('strong-mesh-client:build-client');
+var exorcist = require('exorcist');
 
 var nodeEnv = process.env.NODE_ENV  || 'production';
 var bundlePathBase = path.join(__dirname, 'mesh-client-bundle');
@@ -129,6 +130,7 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
     .on('error', function(err) {
       callback(err);
     })
+    .pipe(exorcist(bundleSourceMapPath))
     .pipe(out);
 
   out.on('close', callback);
