@@ -87,6 +87,7 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
     // saved to a standalone file when !isDev(env)
     debug: true,
   });
+  b.transform({global: true}, 'uglifyify');
   b.require(path.join(clientDir, 'client.js'), { expose: 'strong-mesh-client' });
 
   // Include mesh-models, exclude non-browser requirements
@@ -122,14 +123,6 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
     }, b);
   } catch(err) {
     return callback(err);
-  }
-
-  if (bundleSourceMapPath) {
-    minifyOptions = {
-      output: bundleSourceMapPath,
-      map: sourceMapUrl,
-    };
-    b.plugin('minifyify', minifyOptions);
   }
 
   b.bundle()
