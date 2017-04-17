@@ -97,6 +97,7 @@ function buildBrowserBundle(out, sourceMapUrl, callback) {
   // Include mesh-models, exclude non-browser requirements
   b.require(path.join(meshModelsDir,'index.js'), { expose: 'strong-mesh-models' });
   var nonBrowserReq = [
+    'ajv', // optional and unused component of request >=2.80.0
     'minkelite', 'compression', 'concat-stream', 'errorhandler', 'sprintf',
     'loopback-explorer', 'osenv', 'posix-getopt', 'serve-favicon', 'user-home',
     'strong-npm-ls', 'strong-tunnel', 'http-auth'
